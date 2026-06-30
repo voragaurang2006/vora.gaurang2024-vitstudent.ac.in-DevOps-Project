@@ -1,0 +1,154 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "title": "CPU Usage (Cores)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "graphite",
+        "uid": "graphite-prod"
+      },
+      "targets": [
+        {
+          "target": "corporate.website.system.cpu.usage",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "title": "Memory Usage (Bytes)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "graphite",
+        "uid": "graphite-prod"
+      },
+      "targets": [
+        {
+          "target": "corporate.website.jvm.memory.used",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "title": "Network Traffic (pps)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "graphite",
+        "uid": "graphite-prod"
+      },
+      "targets": [
+        {
+          "target": "corporate.website.system.network.in.packets",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "id": 4,
+      "title": "HTTP Availability (%)",
+      "type": "gauge",
+      "datasource": {
+        "type": "graphite",
+        "uid": "graphite-prod"
+      },
+      "targets": [
+        {
+          "target": "corporate.website.http.availability.percentage",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "id": 5,
+      "title": "System Uptime",
+      "type": "stat",
+      "datasource": {
+        "type": "graphite",
+        "uid": "graphite-prod"
+      },
+      "targets": [
+        {
+          "target": "corporate.website.process.uptime",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
+    }
+  ],
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["DevOps", "Production", "Monitoring"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "title": "Corporate Website System Health Dashboard",
+  "uid": "abctech-devops-01",
+  "version": 1
+}
