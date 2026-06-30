@@ -1,0 +1,90 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "voragaurang2006/corporate-website"
+        DOCKER_TAG   = "${BUILD_NUMBER}"
+        REGISTRY_CREDENTIALS_ID = "docker-hub-credentials"
+        KUBECONFIG_CREDENTIALS_ID = "kubeconfig-credentials"
+    }
+
+    options {
+        timeout(time: 1, unit: 'HOURS')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out source code from Git repository...'
+                checkout scm
+            }
+        }
+
+        stage('Maven Compile & Test') {
+            steps {
+                echo 'Running Maven build and test suite...'
+                bat 'mvn clean test'
+            }
+            post {
+                success {
+                    echo 'Maven build and tests completed successfully!'
+                }
+            }
+        }
+
+        stage('Maven Package') {
+            steps {
+                echo 'Packaging application artifact into a JAR file...'
+                bat 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                echo 'Building production Docker image...'
+                bat "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} ."
+                bat "docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest"
+            }
+        }
+
+        stage('Docker Hub Publish') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Logging into Docker Hub and pushing image...'
+                withCredentials([usernamePassword(credentialsId: env.REGISTRY_CREDENTIALS_ID, usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+                    bat "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                    bat "docker push ${DOCKER_IMAGE}:latest"
+                }
+            }
+        }
+
+        stage('Kubernetes Deploy') {
+            steps {
+                echo 'Applying Kubernetes Deployment and Service configuration...'
+                withCredentials([file(credentialsId: env.KUBECONFIG_CREDENTIALS_ID, variable: 'KUBECONFIG')]) {
+                    bat "kubectl --kubeconfig=%KUBECONFIG% apply -f k8s/deployment.yaml"
+                    bat "kubectl --kubeconfig=%KUBECONFIG% apply -f k8s/service.yaml"
+                    bat "kubectl --kubeconfig=%KUBECONFIG% rollout status deployment/corporate-website-deployment"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline execution finished.'
+            cleanWs()
+        }
+        success {
+            echo 'DevOps pipeline executed and deployed successfully!'
+        }
+        failure {
+            echo 'DevOps pipeline failed. Check console outputs for details.'
+        }
+    }
+}
